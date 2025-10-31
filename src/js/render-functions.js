@@ -78,3 +78,47 @@ export function showLoader(loaderElement) {
 export function hideLoader(loaderElement) {
   loaderElement.style.display = 'none';
 }
+
+/**
+ * Shows the Load More button
+ * @param {HTMLElement} loadMoreBtn - Load More button element
+ */
+export function showLoadMoreBtn(loadMoreBtn) {
+  if (loadMoreBtn) {
+    loadMoreBtn.style.display = 'block';
+  }
+}
+
+/**
+ * Hides the Load More button
+ * @param {HTMLElement} loadMoreBtn - Load More button element
+ */
+export function hideLoadMoreBtn(loadMoreBtn) {
+  if (loadMoreBtn) {
+    loadMoreBtn.style.display = 'none';
+  }
+}
+
+/**
+ * Appends new images to existing gallery
+ * @param {HTMLElement} galleryElement - Gallery container element
+ * @param {Array} images - Array of image objects to add
+ */
+export function appendToGallery(galleryElement, images) {
+  const galleryMarkup = renderGallery(images);
+  galleryElement.insertAdjacentHTML('beforeend', galleryMarkup);
+}
+
+/**
+ * Smooth scrolling after loading new images
+ */
+export function smoothScrollToNewImages() {
+  const galleryItems = document.querySelectorAll('.gallery-item');
+  if (galleryItems.length > 0) {
+    const cardHeight = galleryItems[0].getBoundingClientRect().height;
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: 'smooth',
+    });
+  }
+}

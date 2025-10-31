@@ -5,6 +5,10 @@ import {
   clearGallery,
   showLoader,
   hideLoader,
+  showLoadMoreBtn,
+  hideLoadMoreBtn,
+  appendToGallery,
+  smoothScrollToNewImages,
 } from './js/render-functions.js';
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
@@ -15,6 +19,12 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const searchForm = document.getElementById('search-form');
 const gallery = document.getElementById('gallery');
 const loader = document.getElementById('loader');
+const loadMoreBtn = document.getElementById('load-more-btn');
+
+// Global state for pagination
+let currentSearchQuery = '';
+let currentPage = 1;
+let totalHits = 0;
 
 // SimpleLightbox instance
 let lightbox = new SimpleLightbox('.gallery a', {
@@ -24,6 +34,7 @@ let lightbox = new SimpleLightbox('.gallery a', {
 
 // Event listeners
 searchForm.addEventListener('submit', handleSearchSubmit);
+loadMoreBtn.addEventListener('click', handleLoadMore);
 
 /**
  * Handles search form submission
@@ -45,14 +56,32 @@ async function handleSearchSubmit(event) {
     return;
   }
 
-  // Clear previous results and show loader
+  if (query.length < 2) {
+    iziToast.warning({
+      title: 'Warning',
+      message: 'Search query must be at least 2 characters long!',
+      position: 'topRight',
+    });
+    return;
+  }
+
+  // Reset pagination for new search
+  currentSearchQuery = query;
+  currentPage = 1;
+  totalHits = 0;
+
+  // Clear previous results and hide Load More button
   clearGallery(gallery);
+  hideLoadMoreBtn(loadMoreBtn);
   showLoader(loader);
 
   // Fetch images
   try {
-    const data = await fetchImages(query);
+    const data = await fetchImages(query, currentPage);
     hideLoader(loader);
+
+    // Store total hits
+    totalHits = data.totalHits;
 
     // Render gallery
     const galleryMarkup = renderGallery(data.hits);
@@ -67,6 +96,12 @@ async function handleSearchSubmit(event) {
       message: `Found ${data.totalHits} images!`,
       position: 'topRight',
     });
+
+    // Show Load More button if there are more images to load
+    const totalPages = Math.ceil(totalHits / 15);
+    if (currentPage < totalPages) {
+      showLoadMoreBtn(loadMoreBtn);
+    }
   } catch (error) {
     hideLoader(loader);
 
@@ -91,4 +126,62 @@ async function handleSearchSubmit(event) {
 
   // Clear form
   event.target.reset();
+}
+
+/**
+ * Handles Load More button click
+ */
+async function handleLoadMore() {
+  currentPage += 1;
+
+  // Disable button and show loading state
+  loadMoreBtn.disabled = true;
+  loadMoreBtn.textContent = 'Loading...';
+  showLoader(loader);
+
+  try {
+    const data = await fetchImages(currentSearchQuery, currentPage);
+    hideLoader(loader);
+
+    // Append new images to gallery
+    appendToGallery(gallery, data.hits);
+
+    // Refresh SimpleLightbox for new images
+    lightbox.refresh();
+
+    // Smooth scroll to new images
+    smoothScrollToNewImages();
+
+    // Check if there are more images to load
+    const totalPages = Math.ceil(totalHits / 15);
+    if (currentPage < totalPages) {
+      // Re-enable button for next load
+      loadMoreBtn.disabled = false;
+      loadMoreBtn.textContent = 'Load more';
+      showLoadMoreBtn(loadMoreBtn);
+    } else {
+      // Hide button and show end message
+      hideLoadMoreBtn(loadMoreBtn);
+      iziToast.info({
+        title: 'End of Results',
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+      });
+    }
+  } catch (error) {
+    hideLoader(loader);
+
+    // Re-enable button on error
+    loadMoreBtn.disabled = false;
+    loadMoreBtn.textContent = 'Load more';
+    showLoadMoreBtn(loadMoreBtn);
+
+    iziToast.error({
+      title: 'Error',
+      message: 'Failed to load more images. Please try again.',
+      position: 'topRight',
+    });
+
+    console.error('Error loading more images:', error);
+  }
 }

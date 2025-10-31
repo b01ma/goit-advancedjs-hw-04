@@ -8,10 +8,10 @@ const BASE_URL = 'https://pixabay.com/api/';
  * Fetches images from Pixabay API
  * @param {string} query - Search query
  * @param {number} page - Page number (default: 1)
- * @param {number} perPage - Images per page (default: 12)
+ * @param {number} perPage - Images per page (default: 15)
  * @returns {Promise} - Promise that resolves to the API response
  */
-export default async function fetchImages(query, page = 1, perPage = 12) {
+export default async function fetchImages(query, page = 1, perPage = 15) {
   const params = {
     key: API_KEY,
     q: query,
