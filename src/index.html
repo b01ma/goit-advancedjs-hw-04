@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Search Gallery</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container">
+        <h1 class="title">Image Search Gallery</h1>
+        <form class="form" id="search-form">
+          <input
+            type="text"
+            name="searchQuery"
+            class="search-input"
+            placeholder="Search images..."
+            autocomplete="off"
+          />
+          <button type="submit" class="search-btn">Search</button>
+        </form>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <!-- Loader -->
+        <span class="loader" id="loader" style="display: none;">Loading images...</span>
+
+        <!-- Gallery -->
+        <ul class="gallery" id="gallery"></ul>
+      </div>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
